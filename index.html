@@ -7,6 +7,7 @@
     <title>Poster Generator</title>
     <link rel="stylesheet" href="style.css">
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 </head>
 
 <body>
@@ -15,48 +16,7 @@
         <div class="controls">
             <input type="text" id="jobTitleInput" placeholder="Enter Job Title">
             <button id="generateBtn">Generate Posters</button>
-            <button id="downloadAllBtn" style="display:none;">Download All</button>
-            <button id="shareBtn" style="display:none;">Share</button>
-        </div>
-    </div>
-
-    <div class="poster-container" id="posterContainer"></div>
-
-    <div class="modal" id="shareModal">
-        <div class="modal-content">
-            <h2>Share this page:</h2>
-            <a href="#" id="fb" target="_blank">Facebook</a>
-            <a href="#" id="tw" target="_blank">Twitter</a>
-            <a href="#" id="ln" target="_blank">LinkedIn</a>
-            <a href="#" id="wa" target="_blank">WhatsApp</a>
-            <br><br>
-            <button onclick="document.getElementById('shareModal').style.display='none'">Close</button>
-        </div>
-    </div>
-    <script src="script.js"></script>
-</body>
-
-</html>
-
-
-
-<!-- <!DOCTYPE html>
-<html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Poster Generator</title>
-    <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-</head>
-
-<body>
-
-    <div class="control-container">
-        <div class="controls">
-            <input type="text" id="jobTitleInput" placeholder="Enter Job Title">
-            <button id="generateBtn">Generate Posters</button>
+            <button id="downloadAllBtn" style="display:none;">Download ZIP</button>
         </div>
     </div>
 
@@ -64,9 +24,9 @@
 
     <script>
         const generateBtn = document.getElementById("generateBtn");
+        const downloadAllBtn = document.getElementById("downloadAllBtn");
         const posterContainer = document.getElementById("posterContainer");
 
-        // your 11 predefined images
         const imageUrls = [
             './assets/Hiring-1.png',
             './assets/Hiring-2.png',
@@ -110,35 +70,40 @@
     `;
 
                 uploadedImage.appendChild(overlay);
-
-                const downloadBtn = document.createElement("button");
-                downloadBtn.textContent = "Share";
-                downloadBtn.classList.add("download-btn");
-                downloadBtn.style.position = "absolute";
-                downloadBtn.style.bottom = "10px";
-                downloadBtn.style.right = "10px";
-
-                downloadBtn.addEventListener("click", () => {
-                    html2canvas(uploadedImage).then((canvas) => {
-                        const link = document.createElement("a");
-                        link.download = `poster-${index + 1}.png`;
-                        link.href = canvas.toDataURL("image/png");
-                        link.click();
-                    });
-                });
-
-                uploadedImage.appendChild(downloadBtn);
                 posterContainer.appendChild(uploadedImage);
+            });
+
+            downloadAllBtn.style.display = "inline-block";
+        });
+
+        downloadAllBtn.addEventListener("click", async () => {
+            const posters = document.querySelectorAll(".uploaded-image");
+            if (!posters.length) return;
+
+            const zip = new JSZip();
+
+            for (let i = 0; i < posters.length; i++) {
+                const poster = posters[i];
+                const canvas = await html2canvas(poster);
+                const blob = await new Promise(resolve => canvas.toBlob(resolve, "image/png"));
+                zip.file(`poster-${i + 1}.png`, blob);
+            }
+
+            zip.generateAsync({ type: "blob" }).then(content => {
+                const link = document.createElement("a");
+                link.href = URL.createObjectURL(content);
+                link.download = "posters.zip";
+                link.click();
             });
         });
 
         function getDirection(index) {
             if (index < 6) return "overlay";
             if (index < 10) return "overlay-left";
-            return "top-right";
+            return "top-left";
         }
     </script>
 
 </body>
 
-</html> -->
+</html>
