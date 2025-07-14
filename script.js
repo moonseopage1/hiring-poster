@@ -1,9 +1,7 @@
 const generateBtn = document.getElementById("generateBtn");
 const downloadAllBtn = document.getElementById("downloadAllBtn");
-const shareBtn = document.getElementById("shareBtn");
 const posterContainer = document.getElementById("posterContainer");
 
-// predefined images
 const imageUrls = [
   "./assets/Hiring-1.png",
   "./assets/Hiring-2.png",
@@ -51,42 +49,26 @@ generateBtn.addEventListener("click", () => {
   });
 
   downloadAllBtn.style.display = "inline-block";
-  shareBtn.style.display = "inline-block";
 });
 
-downloadAllBtn.addEventListener("click", () => {
+downloadAllBtn.addEventListener("click", async () => {
   const posters = document.querySelectorAll(".uploaded-image");
   if (!posters.length) return;
 
-  posters.forEach((poster, index) => {
-    setTimeout(() => {
-      html2canvas(poster).then((canvas) => {
-        const link = document.createElement("a");
-        link.download = `poster-${index + 1}.png`;
-        link.href = canvas.toDataURL("image/png");
-        link.click();
-      });
-    }, index * 500);
+  const zip = new JSZip();
+
+  for (let i = 0; i < posters.length; i++) {
+    const poster = posters[i];
+    const blob = await domtoimage.toBlob(poster);
+    zip.file(`poster-${i + 1}.png`, blob);
+  }
+
+  zip.generateAsync({ type: "blob" }).then((content) => {
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(content);
+    link.download = "posters.zip";
+    link.click();
   });
-});
-
-shareBtn.addEventListener("click", () => {
-  const pageUrl = encodeURIComponent(window.location.href);
-
-  document.getElementById(
-    "fb"
-  ).href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
-  document.getElementById(
-    "tw"
-  ).href = `https://twitter.com/intent/tweet?url=${pageUrl}`;
-  document.getElementById(
-    "ln"
-  ).href = `https://www.linkedin.com/shareArticle?mini=true&url=${pageUrl}`;
-  document.getElementById(
-    "wa"
-  ).href = `https://api.whatsapp.com/send?text=${pageUrl}`;
-
-  document.getElementById("shareModal").style.display = "flex";
 });
 
 function getDirection(index) {
