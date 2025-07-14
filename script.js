@@ -1,150 +1,96 @@
 const generateBtn = document.getElementById("generateBtn");
+const downloadAllBtn = document.getElementById("downloadAllBtn");
+const shareBtn = document.getElementById("shareBtn");
+const posterContainer = document.getElementById("posterContainer");
+
+// predefined images
+const imageUrls = [
+  "./assets/Hiring-1.png",
+  "./assets/Hiring-2.png",
+  "./assets/Hiring-3.png",
+  "./assets/Hiring-4.png",
+  "./assets/Hiring-6.png",
+  "./assets/Hiring-10.png",
+  "./assets/Hiring-7.png",
+  "./assets/Hiring-8.png",
+  "./assets/Hiring-9.png",
+  "./assets/Hiring-11.png",
+  "./assets/Hiring-5.png",
+];
 
 generateBtn.addEventListener("click", () => {
-  const jobTitle = document.getElementById("jobTitleInput").value;
-  const imageFiles = document.getElementById("imageUploader").files;
-  const clipDirection = document.getElementById("clipDirection").value;
+  const jobTitle = document.getElementById("jobTitleInput").value.trim();
+  posterContainer.innerHTML = "";
 
-  if (!imageFiles.length || !jobTitle || !clipDirection) {
-    alert(
-      "Please select at least one image, enter a job title and choose a clip direction."
-    );
+  if (!jobTitle) {
+    alert("Please enter a job title.");
     return;
   }
 
-  const posterContainer = document.getElementById("posterContainer");
-  posterContainer.innerHTML = ""; // clear previous posters
-
-  Array.from(imageFiles).forEach((imageFile, index) => {
-    const imageURL = URL.createObjectURL(imageFile);
+  imageUrls.forEach((imageURL, index) => {
+    const direction = getDirection(index);
 
     const uploadedImage = document.createElement("div");
     uploadedImage.classList.add("uploaded-image");
     uploadedImage.style.backgroundImage = `url(${imageURL})`;
     uploadedImage.style.position = "relative";
 
-    // create overlay
     const overlay = document.createElement("div");
-    overlay.classList.add(getOverlayClassName(clipDirection));
+    overlay.classList.add(direction);
 
-    const overlayTemplate = `
+    overlay.innerHTML = `
       <div class="overlayTemplate">
         <h4 class="weAre">We're</h4>
         <h1 class="hiring">HiRING!</h1>
         <p class="jobTitle">${jobTitle}</p>
       </div>
     `;
-    overlay.innerHTML = overlayTemplate;
 
     uploadedImage.appendChild(overlay);
+    posterContainer.appendChild(uploadedImage);
+  });
 
-    // create individual download button
-    const downloadBtn = document.createElement("button");
-    downloadBtn.textContent = "Share";
-    downloadBtn.classList.add("download-btn");
-    downloadBtn.style.position = "absolute";
-    downloadBtn.style.bottom = "10px";
-    downloadBtn.style.right = "10px";
+  downloadAllBtn.style.display = "inline-block";
+  shareBtn.style.display = "inline-block";
+});
 
-    downloadBtn.addEventListener("click", () => {
-      html2canvas(uploadedImage).then((canvas) => {
+downloadAllBtn.addEventListener("click", () => {
+  const posters = document.querySelectorAll(".uploaded-image");
+  if (!posters.length) return;
+
+  posters.forEach((poster, index) => {
+    setTimeout(() => {
+      html2canvas(poster).then((canvas) => {
         const link = document.createElement("a");
         link.download = `poster-${index + 1}.png`;
         link.href = canvas.toDataURL("image/png");
         link.click();
       });
-    });
-
-    uploadedImage.appendChild(downloadBtn);
-    posterContainer.appendChild(uploadedImage);
+    }, index * 500);
   });
-
-  function getOverlayClassName(clipDirection) {
-    switch (clipDirection) {
-      case "bottom-left":
-        return "overlay";
-      case "bottom-right":
-        return "overlay-left";
-      case "top-left":
-        return "top-left";
-      case "top-right":
-        return "top-right";
-      case "center":
-        return "overlay-center";
-      default:
-        return "overlay";
-    }
-  }
 });
 
-// const generateBtn = document.getElementById("generateBtn");
+shareBtn.addEventListener("click", () => {
+  const pageUrl = encodeURIComponent(window.location.href);
 
-// generateBtn.addEventListener("click", () => {
-//   const jobTitle = document.getElementById("jobTitleInput").value;
-//   const imageFile = document.getElementById("imageUploader").files[0];
-//   const clipDirection = document.getElementById("clipDirection").value;
+  document.getElementById(
+    "fb"
+  ).href = `https://www.facebook.com/sharer/sharer.php?u=${pageUrl}`;
+  document.getElementById(
+    "tw"
+  ).href = `https://twitter.com/intent/tweet?url=${pageUrl}`;
+  document.getElementById(
+    "ln"
+  ).href = `https://www.linkedin.com/shareArticle?mini=true&url=${pageUrl}`;
+  document.getElementById(
+    "wa"
+  ).href = `https://api.whatsapp.com/send?text=${pageUrl}`;
 
-//   if (!imageFile || !jobTitle || !clipDirection) {
-//     alert(
-//       "Please select an image, enter a job title and choose a clip direction."
-//     );
-//     return;
-//   }
+  document.getElementById("shareModal").style.display = "flex";
+});
 
-//   const image = URL.createObjectURL(imageFile);
-//   const uploadedImage = document.getElementById("uploadedImage");
-
-//   // set background
-//   uploadedImage.style.backgroundImage = `url(${image})`;
-
-//   // 🧹 Remove existing overlay if any
-//   const oldOverlay = uploadedImage.querySelector(
-//     ".overlay, .overlay-left, .top-left, .top-right, .overlay-center"
-//   );
-//   if (oldOverlay) oldOverlay.remove();
-
-//   // create new overlay
-//   const overlay = document.createElement("div");
-//   overlay.classList.add(getOverlayClassName(clipDirection));
-
-//   const overlayTemplate = `
-//     <div class="overlayTemplate">
-//       <h4 class="weAre">We're</h4>
-//       <h1 class="hiring">HiRING!</h1>
-//       <p class="jobTitle">${jobTitle}</p>
-//     </div>
-//   `;
-//   overlay.innerHTML = overlayTemplate;
-
-//   uploadedImage.appendChild(overlay);
-// });
-
-// function getOverlayClassName(clipDirection) {
-//   switch (clipDirection) {
-//     case "bottom-left":
-//       return "overlay";
-//     case "bottom-right":
-//       return "overlay-left";
-//     case "top-left":
-//       return "top-left";
-//     case "top-right":
-//       return "top-right";
-//     case "center":
-//       return "overlay-center";
-//     default:
-//       return "overlay";
-//   }
-// }
-
-// // download logic
-// const downloadBtn = document.getElementById("downloadBtn");
-// downloadBtn.addEventListener("click", () => {
-//   const uploadedImage = document.getElementById("uploadedImage");
-
-//   html2canvas(uploadedImage).then((canvas) => {
-//     const link = document.createElement("a");
-//     link.download = "poster.png";
-//     link.href = canvas.toDataURL("image/png");
-//     link.click();
-//   });
-// });
+function getDirection(index) {
+  if (index < 6) return "overlay";
+  if (index < 10) return "overlay-left";
+  return "top-left";
+}
