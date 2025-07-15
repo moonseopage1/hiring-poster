@@ -141,21 +141,25 @@ document.querySelectorAll(".share-btn").forEach((btn) => {
       return;
     }
 
-    if (
-      navigator.canShare &&
-      navigator.canShare({ files: generatedPosterFiles })
-    ) {
+    // Try just 1 file at first
+    const filesToShare = generatedPosterFiles.slice(0, 1);
+
+    if (navigator.canShare && navigator.canShare({ files: filesToShare })) {
       try {
         await navigator.share({
           title: "We’re hiring!",
-          text: "Check out these posters I just created!",
-          files: generatedPosterFiles,
+          text: "Check out this poster I just created!",
+          files: filesToShare,
         });
         console.log("Shared successfully.");
       } catch (err) {
         console.error("Sharing failed:", err);
+        alert(
+          "Sharing failed. Make sure you’re using a supported browser (mobile Chrome/Safari) and HTTPS."
+        );
       }
     } else {
+      console.warn("Cannot share files — falling back to ZIP.");
       const zip = new JSZip();
       generatedPosterFiles.forEach((file) => {
         zip.file(file.name, file);
@@ -169,11 +173,52 @@ document.querySelectorAll(".share-btn").forEach((btn) => {
       });
 
       alert(
-        "Sharing multiple images isn’t supported on this device. Posters have been downloaded as a ZIP — please upload them manually."
+        "Sharing images isn’t supported on this device or browser. Posters have been downloaded as a ZIP — please upload them manually."
       );
     }
   });
 });
+
+// document.querySelectorAll(".share-btn").forEach((btn) => {
+//   btn.addEventListener("click", async () => {
+//     if (!generatedPosterFiles.length) {
+//       alert("Please generate posters first.");
+//       return;
+//     }
+
+//     if (
+//       navigator.canShare &&
+//       navigator.canShare({ files: generatedPosterFiles })
+//     ) {
+//       try {
+//         await navigator.share({
+//           title: "We’re hiring!",
+//           text: "Check out these posters I just created!",
+//           files: generatedPosterFiles,
+//         });
+//         console.log("Shared successfully.");
+//       } catch (err) {
+//         console.error("Sharing failed:", err);
+//       }
+//     } else {
+//       const zip = new JSZip();
+//       generatedPosterFiles.forEach((file) => {
+//         zip.file(file.name, file);
+//       });
+
+//       zip.generateAsync({ type: "blob" }).then((content) => {
+//         const link = document.createElement("a");
+//         link.href = URL.createObjectURL(content);
+//         link.download = "posters.zip";
+//         link.click();
+//       });
+
+//       alert(
+//         "Sharing multiple images isn’t supported on this device. Posters have been downloaded as a ZIP — please upload them manually."
+//       );
+//     }
+//   });
+// });
 
 function getDirection(index) {
   if (index < 6) return "overlay";
