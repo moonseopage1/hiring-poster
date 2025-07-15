@@ -16,7 +16,6 @@ const imageUrls = [
   "./assets/Hiring-5.png",
 ];
 
-// 🔷 hide buttons on page load
 downloadAllBtn.style.display = "none";
 document
   .querySelectorAll(".share-btn")
@@ -90,7 +89,7 @@ document.querySelectorAll(".share-btn").forEach((btn) => {
     );
     const url = encodeURIComponent(
       "https://hr.seopage1.net/job-opening/ed55913aa8c2fa7fccb729ba8bf348f7"
-    ); // Your hosted page with posters
+    );
 
     let shareUrl = "";
 
