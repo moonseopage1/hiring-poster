@@ -16,6 +16,12 @@ const imageUrls = [
   "./assets/Hiring-5.png",
 ];
 
+// 🔷 hide buttons on page load
+downloadAllBtn.style.display = "none";
+document
+  .querySelectorAll(".share-btn")
+  .forEach((btn) => (btn.style.display = "none"));
+
 generateBtn.addEventListener("click", () => {
   const jobTitle = document.getElementById("jobTitleInput").value.trim();
   posterContainer.innerHTML = "";
@@ -48,7 +54,11 @@ generateBtn.addEventListener("click", () => {
     posterContainer.appendChild(uploadedImage);
   });
 
+  // 🔷 show buttons now that posters are ready
   downloadAllBtn.style.display = "inline-block";
+  document
+    .querySelectorAll(".share-btn")
+    .forEach((btn) => (btn.style.display = "inline-block"));
 });
 
 downloadAllBtn.addEventListener("click", async () => {
@@ -68,6 +78,31 @@ downloadAllBtn.addEventListener("click", async () => {
     link.href = URL.createObjectURL(content);
     link.download = "posters.zip";
     link.click();
+  });
+});
+
+document.querySelectorAll(".share-btn").forEach((btn) => {
+  btn.addEventListener("click", () => {
+    const platform = btn.getAttribute("data-platform");
+    const jobTitle = document.getElementById("jobTitleInput").value.trim();
+    const message = encodeURIComponent(
+      `We are hiring for the position of ${jobTitle}! 🚀 Check out the posters and join our team.`
+    );
+    const url = encodeURIComponent(
+      "https://hr.seopage1.net/job-opening/ed55913aa8c2fa7fccb729ba8bf348f7"
+    ); // Your hosted page with posters
+
+    let shareUrl = "";
+
+    if (platform === "facebook") {
+      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
+    } else if (platform === "twitter") {
+      shareUrl = `https://twitter.com/intent/tweet?text=${message}&url=${url}`;
+    } else if (platform === "linkedin") {
+      shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+    }
+
+    window.open(shareUrl, "_blank", "width=600,height=400");
   });
 });
 

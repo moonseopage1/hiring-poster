@@ -188,6 +188,15 @@
      transform: translate(-50%, -50%);
  }
 
+ .overlayTemplate {
+     max-width: 700px;
+ }
+
+ .overlay-left .overlayTemplate,
+ .top-left .overlayTemplate {
+     margin-left: auto;
+ }
+
  .overlayTemplate .weAre {
      font-size: 70px;
      line-height: 0.9;
@@ -217,4 +226,40 @@
      font-size: 16px;
      transition: background 0.3s ease;
      text-decoration: none;
+ }
+
+ .social-buttons {
+     display: flex;
+     justify-content: center;
+     gap: 10px;
+     margin: 20px 0;
+ }
+
+ .share-btn {
+     width: 40px;
+     height: 40px;
+     border: none;
+     border-radius: 50%;
+     color: #fff;
+     font-size: 18px;
+     cursor: pointer;
+     display: flex;
+     align-items: center;
+     justify-content: center;
+ }
+
+ .share-btn.facebook {
+     background-color: #3b5998;
+ }
+
+ .share-btn.twitter {
+     background-color: #1da1f2;
+ }
+
+ .share-btn.linkedin {
+     background-color: #0077b5;
+ }
+
+ .share-btn:hover {
+     opacity: 0.8;
  }
