@@ -21,6 +21,32 @@ document
   .querySelectorAll(".share-btn")
   .forEach((btn) => (btn.style.display = "none"));
 
+const bootstrapModal = new bootstrap.Modal(
+  document.getElementById("posterPreviewModal")
+);
+const modalImage = document.getElementById("modalImage");
+
+posterContainer.addEventListener("click", (e) => {
+  const uploadedImage = e.target.closest(".uploaded-image");
+  if (!uploadedImage) return;
+
+  const actualContent = uploadedImage.querySelector(".actual-size");
+  if (!actualContent) return;
+
+  actualContent.classList.remove("scaled");
+
+  domtoimage
+    .toPng(actualContent)
+    .then((dataUrl) => {
+      modalImage.src = dataUrl;
+      bootstrapModal.show();
+      actualContent.classList.add("scaled");
+    })
+    .catch((err) => {
+      console.error("Failed to generate image for preview", err);
+    });
+});
+
 generateBtn.addEventListener("click", () => {
   const jobTitle = document.getElementById("jobTitleInput").value.trim();
   posterContainer.innerHTML = "";
@@ -35,8 +61,15 @@ generateBtn.addEventListener("click", () => {
 
     const uploadedImage = document.createElement("div");
     uploadedImage.classList.add("uploaded-image");
-    uploadedImage.style.backgroundImage = `url(${imageURL})`;
-    uploadedImage.style.position = "relative";
+
+    const actualSize = document.createElement("div");
+    actualSize.classList.add("actual-size", "scaled"); // scale only visually for preview
+    actualSize.style.backgroundImage = `url(${imageURL})`;
+    actualSize.style.backgroundSize = "cover";
+    actualSize.style.backgroundPosition = "center";
+    actualSize.style.width = "1080px";
+    actualSize.style.height = "1080px";
+    actualSize.style.position = "relative";
 
     const overlay = document.createElement("div");
     overlay.classList.add(direction);
@@ -49,11 +82,11 @@ generateBtn.addEventListener("click", () => {
       </div>
     `;
 
-    uploadedImage.appendChild(overlay);
+    actualSize.appendChild(overlay);
+    uploadedImage.appendChild(actualSize);
     posterContainer.appendChild(uploadedImage);
   });
 
-  // 🔷 show buttons now that posters are ready
   downloadAllBtn.style.display = "inline-block";
   document
     .querySelectorAll(".share-btn")
@@ -68,7 +101,16 @@ downloadAllBtn.addEventListener("click", async () => {
 
   for (let i = 0; i < posters.length; i++) {
     const poster = posters[i];
-    const blob = await domtoimage.toBlob(poster);
+    const actualContent = poster.querySelector(".actual-size");
+
+    // remove scale class temporarily
+    actualContent.classList.remove("scaled");
+
+    const blob = await domtoimage.toBlob(actualContent);
+
+    // re-add scale for preview
+    actualContent.classList.add("scaled");
+
     zip.file(`poster-${i + 1}.png`, blob);
   }
 
