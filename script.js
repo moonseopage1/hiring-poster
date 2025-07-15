@@ -124,41 +124,54 @@ downloadAllBtn.addEventListener("click", async () => {
 
 document.querySelectorAll(".share-btn").forEach((btn) => {
   btn.addEventListener("click", async () => {
-    const poster = document.querySelector(".uploaded-image .actual-size");
-    if (!poster) {
-      alert("Please generate a poster first.");
+    const posters = document.querySelectorAll(".uploaded-image .actual-size");
+    if (!posters.length) {
+      alert("Please generate posters first.");
       return;
     }
 
-    // Remove scale class temporarily
-    poster.classList.remove("scaled");
+    const files = [];
 
-    const blob = await domtoimage.toBlob(poster);
+    for (let i = 0; i < posters.length; i++) {
+      const poster = posters[i];
+      poster.classList.remove("scaled");
 
-    // Re-add scale
-    poster.classList.add("scaled");
+      const blob = await domtoimage.toBlob(poster);
+      const file = new File([blob], `poster-${i + 1}.png`, {
+        type: "image/png",
+      });
+      files.push(file);
 
-    const file = new File([blob], "poster.png", { type: "image/png" });
+      poster.classList.add("scaled");
+    }
 
-    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+    if (navigator.canShare && navigator.canShare({ files })) {
       try {
         await navigator.share({
           title: "We’re hiring!",
-          text: "Check out this poster I just created!",
-          files: [file],
+          text: "Check out these posters I just created!",
+          files,
         });
         console.log("Shared successfully.");
       } catch (err) {
         console.error("Sharing failed:", err);
       }
     } else {
-      // fallback: download and instruct user to upload manually
-      const link = document.createElement("a");
-      link.href = URL.createObjectURL(blob);
-      link.download = "poster.png";
-      link.click();
+      // fallback: download all posters as a zip
+      const zip = new JSZip();
+      files.forEach((file) => {
+        zip.file(file.name, file);
+      });
+
+      zip.generateAsync({ type: "blob" }).then((content) => {
+        const link = document.createElement("a");
+        link.href = URL.createObjectURL(content);
+        link.download = "posters.zip";
+        link.click();
+      });
+
       alert(
-        "Sharing images directly isn’t supported on this device. The poster has been downloaded — please upload it manually to your social media."
+        "Sharing multiple images isn’t supported on this device. Posters have been downloaded as a ZIP — please upload them manually to your social media."
       );
     }
   });
