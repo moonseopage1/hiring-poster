@@ -123,29 +123,71 @@ downloadAllBtn.addEventListener("click", async () => {
 });
 
 document.querySelectorAll(".share-btn").forEach((btn) => {
-  btn.addEventListener("click", () => {
-    const platform = btn.getAttribute("data-platform");
-    const jobTitle = document.getElementById("jobTitleInput").value.trim();
-    const message = encodeURIComponent(
-      `We are hiring for the position of ${jobTitle}! 🚀 Check out the posters and join our team.`
-    );
-    const url = encodeURIComponent(
-      "https://hr.seopage1.net/job-opening/ed55913aa8c2fa7fccb729ba8bf348f7"
-    );
-
-    let shareUrl = "";
-
-    if (platform === "facebook") {
-      shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
-    } else if (platform === "twitter") {
-      shareUrl = `https://twitter.com/intent/tweet?text=${message}&url=${url}`;
-    } else if (platform === "linkedin") {
-      shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+  btn.addEventListener("click", async () => {
+    const poster = document.querySelector(".uploaded-image .actual-size");
+    if (!poster) {
+      alert("Please generate a poster first.");
+      return;
     }
 
-    window.open(shareUrl, "_blank", "width=600,height=400");
+    // Remove scale class temporarily
+    poster.classList.remove("scaled");
+
+    const blob = await domtoimage.toBlob(poster);
+
+    // Re-add scale
+    poster.classList.add("scaled");
+
+    const file = new File([blob], "poster.png", { type: "image/png" });
+
+    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+      try {
+        await navigator.share({
+          title: "We’re hiring!",
+          text: "Check out this poster I just created!",
+          files: [file],
+        });
+        console.log("Shared successfully.");
+      } catch (err) {
+        console.error("Sharing failed:", err);
+      }
+    } else {
+      // fallback: download and instruct user to upload manually
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = "poster.png";
+      link.click();
+      alert(
+        "Sharing images directly isn’t supported on this device. The poster has been downloaded — please upload it manually to your social media."
+      );
+    }
   });
 });
+
+// document.querySelectorAll(".share-btn").forEach((btn) => {
+//   btn.addEventListener("click", () => {
+//     const platform = btn.getAttribute("data-platform");
+//     const jobTitle = document.getElementById("jobTitleInput").value.trim();
+//     const message = encodeURIComponent(
+//       `We are hiring for the position of ${jobTitle}! 🚀 Check out the posters and join our team.`
+//     );
+//     const url = encodeURIComponent(
+//       "https://hr.seopage1.net/job-opening/ed55913aa8c2fa7fccb729ba8bf348f7"
+//     );
+
+//     let shareUrl = "";
+
+//     if (platform === "facebook") {
+//       shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${url}&quote=${message}`;
+//     } else if (platform === "twitter") {
+//       shareUrl = `https://twitter.com/intent/tweet?text=${message}&url=${url}`;
+//     } else if (platform === "linkedin") {
+//       shareUrl = `https://www.linkedin.com/sharing/share-offsite/?url=${url}`;
+//     }
+
+//     window.open(shareUrl, "_blank", "width=600,height=400");
+//   });
+// });
 
 function getDirection(index) {
   if (index < 6) return "overlay";
